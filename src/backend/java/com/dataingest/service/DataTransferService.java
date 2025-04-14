@@ -1,8 +1,8 @@
-
 package com.dataingest.service;
 
 import com.dataingest.model.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +24,7 @@ import java.util.StringJoiner;
 
 @Service
 public class DataTransferService {
+    private static final Logger logger = LoggerFactory.getLogger(DataTransferService.class);
     
     @Autowired
     private ClickHouseService clickHouseService;
@@ -37,10 +38,15 @@ public class DataTransferService {
             String tableName, 
             List<String> columns) throws Exception {
         
+        logger.info("Starting ClickHouse to Flat File transfer for table: {}", tableName);
+        logger.info("Selected columns: {}", columns);
+        
         IngestionResponse response = new IngestionResponse();
         
         try (Connection connection = getClickHouseConnection(clickHouseConfig);
              BufferedWriter writer = new BufferedWriter(new FileWriter(flatFileConfig.getFileName()))) {
+            
+            logger.info("Connected to ClickHouse successfully");
             
             // Build query
             StringBuilder queryBuilder = new StringBuilder("SELECT ");
@@ -77,10 +83,12 @@ public class DataTransferService {
                 recordCount++;
             }
             
+            logger.info("Transfer completed successfully. Records processed: {}", recordCount);
             response.setSuccess(true);
             response.setRecordCount(recordCount);
             return response;
         } catch (Exception e) {
+            logger.error("Transfer failed: {}", e.getMessage(), e);
             response.setSuccess(false);
             response.setError("Transfer failed: " + e.getMessage());
             throw e;
@@ -93,10 +101,15 @@ public class DataTransferService {
             String tableName, 
             List<String> columns) throws Exception {
         
+        logger.info("Starting Flat File to ClickHouse transfer to table: {}", tableName);
+        logger.info("Selected columns: {}", columns);
+        
         IngestionResponse response = new IngestionResponse();
         
         try (Connection connection = getClickHouseConnection(clickHouseConfig);
              BufferedReader reader = new BufferedReader(new FileReader(flatFileConfig.getFileName()))) {
+            
+            logger.info("Connected to ClickHouse successfully");
             
             // Read header line to map columns
             String headerLine = reader.readLine();
@@ -189,10 +202,12 @@ public class DataTransferService {
                 pstmt.executeBatch();
             }
             
+            logger.info("Transfer completed successfully. Records processed: {}", recordCount);
             response.setSuccess(true);
             response.setRecordCount(recordCount);
             return response;
         } catch (Exception e) {
+            logger.error("Transfer failed: {}", e.getMessage(), e);
             response.setSuccess(false);
             response.setError("Transfer failed: " + e.getMessage());
             throw e;

@@ -1,26 +1,32 @@
-
 package com.dataingest.service;
 
 import com.dataingest.model.*;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 @Service
 public class ClickHouseService {
     
+    @Autowired
+    private JWTService jwtService;
+    
     public ConnectionResponse connect(ClickHouseConfig config) throws Exception {
         ConnectionResponse response = new ConnectionResponse();
+        
+        // Validate JWT token first
+        if (!jwtService.validateToken(config.getJwtToken())) {
+            response.setSuccess(false);
+            response.setError("Invalid or expired JWT token");
+            return response;
+        }
         
         try (Connection connection = getConnection(config)) {
             // List available tables
@@ -116,7 +122,11 @@ public class ClickHouseService {
     private Connection getConnection(ClickHouseConfig config) throws Exception {
         Properties properties = new Properties();
         properties.setProperty("user", config.getUser());
-        properties.setProperty("password", config.getJwtToken());
+        
+        // Use JWT token for authentication
+        if (config.getJwtToken() != null && !config.getJwtToken().isEmpty()) {
+            properties.setProperty("password", config.getJwtToken());
+        }
         
         // Check if using HTTPS port
         boolean useSSL = config.getPort().equals("9440") || config.getPort().equals("8443");
