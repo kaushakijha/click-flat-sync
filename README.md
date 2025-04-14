@@ -1,73 +1,98 @@
-# Welcome to your Lovable project
 
-## Project info
+# ClickHouse & Flat File Bidirectional Data Ingestion Tool
 
-**URL**: https://lovable.dev/projects/340af587-d0a4-48f6-8f75-bc3da621c688
+This project implements a web-based application that enables bidirectional data transfer between ClickHouse databases and flat files. The application provides a user-friendly interface for configuring connections, selecting data sources and targets, and executing data transfers.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Bidirectional data transfer:
+  - ClickHouse → Flat File
+  - Flat File → ClickHouse
+- Source and target selection with intuitive UI
+- ClickHouse connection with JWT token authentication
+- Table and column selection
+- Data preview capability
+- Progress tracking and completion reporting
+- Error handling and user-friendly messages
 
-**Use Lovable**
+## Project Structure
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/340af587-d0a4-48f6-8f75-bc3da621c688) and start prompting.
+The project consists of two main components:
 
-Changes made via Lovable will be committed automatically to this repo.
+### Frontend (React/TypeScript)
 
-**Use your preferred IDE**
+- Modern UI built with React and TypeScript
+- Interface for configuring connections and viewing results
+- Responsive design using Tailwind CSS
+- Real-time status updates
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Backend (Java)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- RESTful API for handling data transfer operations
+- ClickHouse integration using JDBC driver
+- Flat file parsing and generation
+- Efficient data handling with batch processing
 
-Follow these steps:
+## Setup and Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Prerequisites
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- Node.js and npm for frontend development
+- Java JDK 11+ and Maven for backend development
+- ClickHouse instance (local or remote)
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Frontend Setup
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+1. Clone the repository
+2. Navigate to the project directory
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-**Edit a file directly in GitHub**
+### Backend Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Navigate to the backend directory
+2. Build the project:
+   ```bash
+   mvn clean install
+   ```
+3. Run the server:
+   ```bash
+   mvn spring-boot:run
+   ```
 
-**Use GitHub Codespaces**
+## Usage
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Open the application in a web browser
+2. Choose a data source (ClickHouse or Flat File)
+3. Configure the connection parameters
+4. Select the target for data ingestion
+5. Choose tables and columns to transfer
+6. Preview the data (optional)
+7. Start the ingestion process
+8. View the results and record count
 
-## What technologies are used for this project?
+## Testing
 
-This project is built with:
+For testing the application, you can use:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- ClickHouse example datasets like `uk_price_paid` and `ontime`
+- Sample CSV files included in the `testdata` directory
 
-## How can I deploy this project?
+## Development
 
-Simply open [Lovable](https://lovable.dev/projects/340af587-d0a4-48f6-8f75-bc3da621c688) and click on Share -> Publish.
+This project was developed using:
 
-## Can I connect a custom domain to my Lovable project?
+- React with TypeScript for the frontend
+- Java Spring Boot for the backend
+- Tailwind CSS for styling
+- shadcn/ui for component library
 
-Yes, you can!
+## License
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License - see the LICENSE file for details.
