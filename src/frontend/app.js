@@ -58,6 +58,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Handle connect button click
+  const API_BASE_URL = "http://localhost:8080/api";
+  const CLICKHOUSE_URL = "http://localhost:8123";
+
   async function handleConnect() {
     const sourceType = document.querySelector(
       'input[name="sourceType"]:checked'
@@ -67,15 +70,14 @@ document.addEventListener("DOMContentLoaded", function () {
       if (sourceType === "clickhouse") {
         const config = {
           host: document.getElementById("host").value,
-          port: parseInt(document.getElementById("port").value),
+          port: document.getElementById("port").value,
           database: document.getElementById("database").value,
-          username: document.getElementById("username").value,
-          password: document.getElementById("password").value,
+          user: document.getElementById("username").value,
           jwtToken: document.getElementById("jwtToken").value,
         };
 
         // Test connection
-        const response = await fetch("http://localhost:8080/api/connect", {
+        const response = await fetch(`${API_BASE_URL}/connect`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -88,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Get tables
-        const tablesResponse = await fetch("http://localhost:8080/api/tables", {
+        const tablesResponse = await fetch(`${API_BASE_URL}/tables`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -109,7 +111,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       showSuccess("Connected successfully!");
     } catch (error) {
-      showError("Connection failed: " + error.message);
+      console.error("Connection error:", error);
+      showError(error.message);
     }
   }
 
@@ -157,21 +160,34 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     if (targetType === "flatfile") {
-      config.outputFile = document.getElementById("outputFile").value;
-      const response = await fetch("http://localhost:8080/api/export", {
+      const outputFile = document.getElementById("outputFile").value;
+      const exportRequest = {
+        config: {
+          host: document.getElementById("host").value,
+          port: document.getElementById("port").value,
+          database: document.getElementById("database").value,
+          user: document.getElementById("username").value,
+          jwtToken: document.getElementById("jwtToken").value,
+        },
+        columns: getSelectedColumns(),
+        outputFile: outputFile,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/export`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(config),
+        body: JSON.stringify(exportRequest),
       });
 
       if (!response.ok) {
-        throw new Error("Export failed");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Export failed");
       }
     } else {
       config.targetTable = document.getElementById("targetTable").value;
-      const response = await fetch("http://localhost:8080/api/import", {
+      const response = await fetch(`${API_BASE_URL}/import`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -202,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "targetTable",
         document.getElementById("targetTable").value
       );
-      const response = await fetch("http://localhost:8080/api/import", {
+      const response = await fetch(`${API_BASE_URL}/import`, {
         method: "POST",
         body: formData,
       });

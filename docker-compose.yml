@@ -8,6 +8,7 @@ services:
     ports:
       - "8123:8123" # HTTP interface
       - "9000:9000" # Native interface
+      - "9440:9440" # HTTPS interface
     volumes:
       - clickhouse-data:/var/lib/clickhouse
     environment:
@@ -62,7 +63,8 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=http://localhost:8080/api
+      - VITE_API_URL=http://backend:8080/api
+      - VITE_CLICKHOUSE_URL=http://clickhouse:8123
 
 volumes:
   clickhouse-data:

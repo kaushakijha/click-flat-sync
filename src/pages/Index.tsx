@@ -5,7 +5,7 @@ import FlatFileConfig from "@/components/FlatFileConfig";
 import { TableSelection } from "@/components/TableSelection";
 import ColumnSelection from "@/components/ColumnSelection";
 import IngestionControl from "@/components/IngestionControl";
-import ResultDisplay from "@/components/ResultDisplay";
+import { ResultDisplay } from "@/components/ResultDisplay";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -562,8 +562,22 @@ const Index = () => {
                   </p>
                 </div>
               )}
-              {recordCount !== null && status === "completed" && (
-                <ResultDisplay recordCount={recordCount} />
+              {recordCount !== null && (
+                <ResultDisplay
+                  recordCount={recordCount}
+                  status={
+                    status === "completed"
+                      ? "success"
+                      : status === "error"
+                      ? "error"
+                      : "in_progress"
+                  }
+                  error={error || undefined}
+                  progress={status === "ingesting" ? progress : undefined}
+                  sourceType={sourceType || undefined}
+                  targetType={targetType || undefined}
+                  operationType="export"
+                />
               )}
             </CardContent>
           </Card>
