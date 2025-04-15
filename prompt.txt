@@ -1,0 +1,18 @@
+
+AI Prompts Used for Assignment 2 - Click-Flat-Sync
+
+1. "How can I design a service in Java to handle both importing data from a CSV to ClickHouse and exporting data from ClickHouse to CSV using JDBC?"
+2. "What’s the most efficient way to read large CSV files in Java and stream the data to ClickHouse using batches?"
+3. "How can I ensure type safety when mapping CSV column types to ClickHouse data types in a Spring Boot backend?"
+4. "What architectural design pattern is best suited for separating ingestion logic in a Spring Boot application?"
+5. "How to implement JWT-based authentication specifically for JDBC connections to ClickHouse?"
+6. "What are the most efficient practices to handle schema discovery in flat files (CSV/TSV) in Java?"
+7. "How to validate user-selected columns against a ClickHouse table schema dynamically?"
+8. "What’s the best way to manage and visualize ingestion progress in a React frontend?"
+9. "How can I implement robust error handling and retry logic for data ingestion failures?"
+10. "What’s the optimal way to configure and parse a multi-table JOIN query in ClickHouse using Spring Boot?"
+11. "How can I preview the first 100 records from a large dataset efficiently in a React app?"
+12. "What strategy can I use to test data consistency after ingestion in an integration test?"
+13. "How can I isolate ingestion logic in a microservice and keep it testable?"
+14. "What are best practices for streaming file uploads from React to Spring Boot for large CSVs?"
+15. "How can I use OpenCSV and Stream APIs together to process large datasets with minimal memory footprint?"
