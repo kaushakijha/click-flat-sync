@@ -1,0 +1,4 @@
+com\clickflatsync\TestConfig.class
+com\clickflatsync\service\JoinServiceTest.class
+com\clickflatsync\service\DataTransferServiceTest.class
+com\clickflatsync\service\ClickHouseServiceTest.class

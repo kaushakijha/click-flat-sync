@@ -1,28 +1,24 @@
-
-import { Card } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface ResultDisplayProps {
   recordCount: number;
+  progress?: number;
 }
 
-const ResultDisplay = ({ recordCount }: ResultDisplayProps) => {
+const ResultDisplay = ({ recordCount, progress = 100 }: ResultDisplayProps) => {
   return (
-    <div className="mt-6">
-      <Card className="bg-green-50 p-6 text-center">
-        <div className="flex justify-center mb-4">
-          <CheckCircle className="h-12 w-12 text-green-600" />
-        </div>
-        <h3 className="text-xl font-medium text-green-800 mb-2">
-          Ingestion Successful
-        </h3>
-        <div className="text-4xl font-bold text-green-700 mb-2">
-          {recordCount.toLocaleString()}
-        </div>
-        <p className="text-green-600">
-          Records successfully transferred
+    <div className="mt-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Progress</span>
+        <span className="text-sm text-gray-500">{progress}%</span>
+      </div>
+      <Progress value={progress} className="h-2" />
+      <div className="mt-4 p-4 bg-green-50 rounded-lg">
+        <p className="text-green-700 font-medium">
+          Successfully processed {recordCount.toLocaleString()} records
         </p>
-      </Card>
+      </div>
     </div>
   );
 };

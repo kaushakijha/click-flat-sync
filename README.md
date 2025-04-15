@@ -1,98 +1,152 @@
+# Click-Flat-Sync
 
-# ClickHouse & Flat File Bidirectional Data Ingestion Tool
-
-This project implements a web-based application that enables bidirectional data transfer between ClickHouse databases and flat files. The application provides a user-friendly interface for configuring connections, selecting data sources and targets, and executing data transfers.
+A modern web application for synchronizing data between ClickHouse and flat files (CSV/TSV). Built with Spring Boot and React.
 
 ## Features
 
-- Bidirectional data transfer:
-  - ClickHouse → Flat File
-  - Flat File → ClickHouse
-- Source and target selection with intuitive UI
-- ClickHouse connection with JWT token authentication
-- Table and column selection
-- Data preview capability
-- Progress tracking and completion reporting
-- Error handling and user-friendly messages
+- Connect to ClickHouse databases
+- Export data from ClickHouse to CSV/TSV files
+- Import data from CSV/TSV files to ClickHouse
+- Join multiple tables with custom conditions
+- Modern, responsive UI built with React
+- Docker support for easy deployment
 
 ## Project Structure
 
-The project consists of two main components:
+```
+click-flat-sync/
+├── src/
+│   ├── backend/                 # Spring Boot backend
+│   │   ├── src/
+│   │   │   ├── main/
+│   │   │   │   ├── java/       # Java source code
+│   │   │   │   └── resources/  # Configuration files
+│   │   │   └── test/           # Test files
+│   │   └── pom.xml             # Maven dependencies
+│   │
+│   └── frontend/               # React frontend
+│       ├── src/
+│       │   ├── components/     # React components
+│       │   ├── services/       # API services
+│       │   └── App.tsx         # Main application
+│       ├── package.json        # NPM dependencies
+│       └── vite.config.ts      # Vite configuration
+│
+├── data/                       # Directory for exported files
+├── docker-compose.yml          # Docker Compose configuration
+├── init-clickhouse.sql         # Sample data initialization
+└── README.md                   # This file
+```
 
-### Frontend (React/TypeScript)
+## Prerequisites
 
-- Modern UI built with React and TypeScript
-- Interface for configuring connections and viewing results
-- Responsive design using Tailwind CSS
-- Real-time status updates
+- Java 17 or higher
+- Node.js 16 or higher
+- Docker and Docker Compose
+- Maven
+- npm or yarn
 
-### Backend (Java)
+## Getting Started
 
-- RESTful API for handling data transfer operations
-- ClickHouse integration using JDBC driver
-- Flat file parsing and generation
-- Efficient data handling with batch processing
+### Using Docker (Recommended)
 
-## Setup and Installation
+1. Clone the repository:
 
-### Prerequisites
-
-- Node.js and npm for frontend development
-- Java JDK 11+ and Maven for backend development
-- ClickHouse instance (local or remote)
-
-### Frontend Setup
-
-1. Clone the repository
-2. Navigate to the project directory
-3. Install dependencies:
    ```bash
-   npm install
+   git clone https://github.com/yourusername/click-flat-sync.git
+   cd click-flat-sync
    ```
-4. Start the development server:
+
+2. Start the application using Docker Compose:
+
    ```bash
-   npm run dev
+   docker-compose up -d
    ```
 
-### Backend Setup
+3. Access the application:
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:8080
+   - ClickHouse: http://localhost:8123
 
-1. Navigate to the backend directory
-2. Build the project:
+### Manual Setup
+
+1. Start ClickHouse:
+
    ```bash
-   mvn clean install
+   docker run -d --name clickhouse -p 8123:8123 -p 9000:9000 clickhouse/clickhouse-server
    ```
-3. Run the server:
+
+2. Initialize the database:
+
    ```bash
+   cat init-clickhouse.sql | curl 'http://localhost:8123/' --data-binary @-
+   ```
+
+3. Start the backend:
+
+   ```bash
+   cd src/backend
    mvn spring-boot:run
    ```
 
-## Usage
+4. Start the frontend:
+   ```bash
+   cd src/frontend
+   npm install
+   npm run dev
+   ```
 
-1. Open the application in a web browser
-2. Choose a data source (ClickHouse or Flat File)
-3. Configure the connection parameters
-4. Select the target for data ingestion
-5. Choose tables and columns to transfer
-6. Preview the data (optional)
-7. Start the ingestion process
-8. View the results and record count
+## Configuration
+
+### ClickHouse Connection
+
+The application supports the following ClickHouse connection parameters:
+
+- Host
+- Port
+- Database
+- Username
+- Password
+- JWT Token (optional)
+
+### File Export/Import
+
+- Supported formats: CSV, TSV
+- Configurable delimiter
+- Column selection
+- Custom file naming
 
 ## Testing
 
-For testing the application, you can use:
+### Backend Tests
 
-- ClickHouse example datasets like `uk_price_paid` and `ontime`
-- Sample CSV files included in the `testdata` directory
+```bash
+cd src/backend
+mvn test
+```
 
-## Development
+### Frontend Tests
 
-This project was developed using:
+```bash
+cd src/frontend
+npm test
+```
 
-- React with TypeScript for the frontend
-- Java Spring Boot for the backend
-- Tailwind CSS for styling
-- shadcn/ui for component library
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- [ClickHouse](https://clickhouse.com/) - The column-oriented database management system
+- [Spring Boot](https://spring.io/projects/spring-boot) - The backend framework
+- [React](https://reactjs.org/) - The frontend library
+- [Vite](https://vitejs.dev/) - The frontend build tool
