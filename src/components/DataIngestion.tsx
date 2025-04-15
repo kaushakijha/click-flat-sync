@@ -1,5 +1,16 @@
 import { useState } from "react";
 import { useAuth } from "../lib/AuthContext";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { TableSelection } from "@/components/TableSelection";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ClickHouseConfig {
   host: string;
@@ -12,6 +23,11 @@ interface ClickHouseConfig {
 interface FlatFileConfig {
   fileName: string;
   delimiter: string;
+}
+
+interface Column {
+  name: string;
+  selected: boolean;
 }
 
 export function DataIngestion() {
@@ -30,10 +46,15 @@ export function DataIngestion() {
   });
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [availableColumns, setAvailableColumns] = useState<string[]>([]);
-  const [status, setStatus] = useState<string>("");
+  const [status, setStatus] = useState<
+    "idle" | "ingesting" | "completed" | "error"
+  >("idle");
   const [recordCount, setRecordCount] = useState<number>(0);
-  const [error, setError] = useState<string>("");
-  const [progress, setProgress] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [selectedTables, setSelectedTables] = useState<string[]>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
+  const [joinCondition, setJoinCondition] = useState<string>("");
 
   const handleConnect = async () => {
     setStatus("Connecting...");
@@ -70,19 +91,50 @@ export function DataIngestion() {
     }
   };
 
-  const handleStartIngestion = async () => {
-    setStatus("Ingesting data...");
-    setError("");
-    setProgress(0);
-    try {
-      // TODO: Implement data ingestion
-      setProgress(100);
-      setRecordCount(1000); // Example count
-      setStatus("Ingestion completed");
-    } catch (err) {
-      setError("Ingestion failed: " + (err as Error).message);
-      setStatus("Error");
+  const handleTableSelect = (tables: string[]) => {
+    setSelectedTables(tables);
+    // Mock fetching columns for selected tables
+    if (tables.length > 0) {
+      const mockColumns: Column[] = [
+        { name: "id", selected: true },
+        { name: "price", selected: true },
+        { name: "date", selected: true },
+        { name: "postcode", selected: true },
+        { name: "property_type", selected: true },
+        { name: "is_new", selected: true },
+      ];
+      setColumns(mockColumns);
+    } else {
+      setColumns([]);
     }
+  };
+
+  const handleStartIngestion = () => {
+    if (selectedTables.length === 0) {
+      setError("Please select at least one table");
+      return;
+    }
+
+    if (selectedTables.length > 1 && !joinCondition) {
+      setError("Please enter a join condition when selecting multiple tables");
+      return;
+    }
+
+    setStatus("ingesting");
+    setProgress(0);
+    setError(null);
+
+    // Mock ingestion process
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setStatus("completed");
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 500);
   };
 
   return (
@@ -211,31 +263,49 @@ export function DataIngestion() {
           )}
         </div>
 
-        {/* Column Selection */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Column Selection</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {availableColumns.map((column) => (
-              <label key={column} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={selectedColumns.includes(column)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedColumns([...selectedColumns, column]);
-                    } else {
-                      setSelectedColumns(
-                        selectedColumns.filter((c) => c !== column)
-                      );
-                    }
-                  }}
-                  className="form-checkbox"
+        {/* Table Selection */}
+        {source === "clickhouse" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Table Selection</CardTitle>
+              <CardDescription>
+                Select one or more tables to use as data source
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TableSelection
+                tables={["table1", "table2", "table3"]}
+                selectedTables={selectedTables}
+                onSelect={handleTableSelect}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Join Condition */}
+        {source === "clickhouse" && selectedTables.length > 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Join Condition</CardTitle>
+              <CardDescription>
+                Enter the condition to join the selected tables
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Textarea
+                  placeholder="Example: table1.id = table2.id AND table2.category = table3.category"
+                  value={joinCondition}
+                  onChange={(e) => setJoinCondition(e.target.value)}
+                  className="min-h-[100px]"
                 />
-                <span>{column}</span>
-              </label>
-            ))}
-          </div>
-        </div>
+                <p className="text-sm text-gray-500">
+                  Use SQL join syntax. Example: table1.id = table2.id
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Actions */}
         <div className="bg-white p-6 rounded-lg shadow">

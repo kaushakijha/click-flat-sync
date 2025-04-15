@@ -1,37 +1,43 @@
-
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TableSelectionProps {
   tables: string[];
-  selectedTable: string;
-  onSelect: (table: string) => void;
+  selectedTables: string[];
+  onSelect: (tables: string[]) => void;
 }
 
-const TableSelection = ({ tables, selectedTable, onSelect }: TableSelectionProps) => {
-  return (
-    <div>
-      {tables.length === 0 ? (
-        <p className="text-gray-500">No tables available. Please check your connection.</p>
-      ) : (
-        <ScrollArea className="h-60 rounded-md border">
-          <RadioGroup
-            value={selectedTable}
-            onValueChange={onSelect}
-            className="p-4"
-          >
-            {tables.map((table) => (
-              <div key={table} className="flex items-center space-x-2 mb-2">
-                <RadioGroupItem value={table} id={table} />
-                <Label htmlFor={table} className="cursor-pointer">{table}</Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </ScrollArea>
-      )}
-    </div>
-  );
-};
+export function TableSelection({
+  tables,
+  selectedTables,
+  onSelect,
+}: TableSelectionProps) {
+  const handleTableToggle = (table: string) => {
+    const newSelectedTables = selectedTables.includes(table)
+      ? selectedTables.filter((t) => t !== table)
+      : [...selectedTables, table];
+    onSelect(newSelectedTables);
+  };
 
-export default TableSelection;
+  return (
+    <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+      <div className="space-y-4">
+        {tables.map((table) => (
+          <div key={table} className="flex items-center space-x-2">
+            <Checkbox
+              id={table}
+              checked={selectedTables.includes(table)}
+              onCheckedChange={() => handleTableToggle(table)}
+            />
+            <label
+              htmlFor={table}
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              {table}
+            </label>
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
+  );
+}

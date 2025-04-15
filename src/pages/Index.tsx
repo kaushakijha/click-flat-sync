@@ -2,7 +2,7 @@ import { useState } from "react";
 import SourceSelection from "@/components/SourceSelection";
 import ClickHouseConfig from "@/components/ClickHouseConfig";
 import FlatFileConfig from "@/components/FlatFileConfig";
-import TableSelection from "@/components/TableSelection";
+import { TableSelection } from "@/components/TableSelection";
 import ColumnSelection from "@/components/ColumnSelection";
 import IngestionControl from "@/components/IngestionControl";
 import ResultDisplay from "@/components/ResultDisplay";
@@ -42,7 +42,7 @@ const Index = () => {
 
   // Tables and columns state
   const [availableTables, setAvailableTables] = useState<string[]>([]);
-  const [selectedTable, setSelectedTable] = useState<string>("");
+  const [selectedTables, setSelectedTables] = useState<string[]>([]);
   const [columns, setColumns] = useState<{ name: string; selected: boolean }[]>(
     []
   );
@@ -57,6 +57,10 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [recordCount, setRecordCount] = useState<number | null>(null);
   const [progress, setProgress] = useState<number>(0);
+
+  // Add join state
+  const [joinCondition, setJoinCondition] = useState<string>("");
+  const [showJoinInput, setShowJoinInput] = useState<boolean>(false);
 
   const handleSourceChange = (type: "clickhouse" | "flatfile") => {
     setSourceType(type);
@@ -108,10 +112,12 @@ const Index = () => {
     }
   };
 
-  const handleTableSelect = (table: string) => {
-    setSelectedTable(table);
+  const handleTableSelect = (tables: string[]) => {
+    setSelectedTables(tables);
+    // Show join input if multiple tables are selected
+    setShowJoinInput(tables.length > 1);
 
-    // Mock fetching columns for selected table
+    // Mock fetching columns for selected tables
     setStatus("fetching");
     setTimeout(() => {
       const mockColumns = [
@@ -142,22 +148,59 @@ const Index = () => {
     try {
       // Mock API call for preview data
       setTimeout(() => {
-        const mockData = Array(5)
-          .fill(null)
-          .map((_, idx) => ({
-            id: `${idx + 1}`,
-            price: Math.floor(Math.random() * 1000000),
-            date: new Date().toISOString().split("T")[0],
-            postcode: `AB${idx + 1} ${idx}CD`,
-            property_type: [
-              "detached",
-              "semi-detached",
-              "terraced",
-              "flat",
-              "other",
-            ][idx],
-            is_new: idx % 2 === 0,
-          }));
+        let mockData;
+
+        if (selectedTables.length > 1 && joinCondition) {
+          // Simulate joined data
+          mockData = Array(5)
+            .fill(null)
+            .map((_, idx) => ({
+              id: `${idx + 1}`,
+              table1_id: `${idx + 1}`,
+              table2_id: `${idx + 1}`,
+              price: Math.floor(Math.random() * 1000000),
+              date: new Date().toISOString().split("T")[0],
+              postcode: `AB${idx + 1} ${idx}CD`,
+              property_type: [
+                "detached",
+                "semi-detached",
+                "terraced",
+                "flat",
+                "other",
+              ][idx],
+              is_new: idx % 2 === 0,
+              // Add joined fields
+              category: ["residential", "commercial", "industrial"][idx % 3],
+              location: [
+                "London",
+                "Manchester",
+                "Birmingham",
+                "Leeds",
+                "Glasgow",
+              ][idx],
+              joined_date: new Date().toISOString().split("T")[0],
+            }));
+
+          console.log("Preview data with join condition:", joinCondition);
+        } else {
+          // Regular single table data
+          mockData = Array(5)
+            .fill(null)
+            .map((_, idx) => ({
+              id: `${idx + 1}`,
+              price: Math.floor(Math.random() * 1000000),
+              date: new Date().toISOString().split("T")[0],
+              postcode: `AB${idx + 1} ${idx}CD`,
+              property_type: [
+                "detached",
+                "semi-detached",
+                "terraced",
+                "flat",
+                "other",
+              ][idx],
+              is_new: idx % 2 === 0,
+            }));
+        }
 
         setPreviewData(mockData);
         setStatus("idle");
@@ -166,6 +209,43 @@ const Index = () => {
       setError("Failed to fetch preview data");
       setStatus("error");
     }
+  };
+
+  // Add a function to test join condition
+  const handleTestJoin = () => {
+    if (!joinCondition) {
+      setError("Please enter a join condition first");
+      return;
+    }
+
+    setStatus("fetching");
+    setError(null);
+
+    // Simulate testing the join condition
+    setTimeout(() => {
+      try {
+        // Basic validation of join condition
+        if (!joinCondition.includes("=")) {
+          throw new Error("Invalid join condition format");
+        }
+
+        // Log the join condition for verification
+        console.log("Testing join condition:", joinCondition);
+        console.log("Selected tables:", selectedTables);
+
+        // Simulate successful join test
+        setStatus("idle");
+        alert(
+          "Join condition is valid! Check the preview data to see the joined results."
+        );
+
+        // Automatically trigger preview to show joined data
+        handlePreview();
+      } catch (err) {
+        setError(`Join test failed: ${(err as Error).message}`);
+        setStatus("error");
+      }
+    }, 1000);
   };
 
   const handleStartIngestion = async () => {
@@ -299,15 +379,57 @@ const Index = () => {
                 <CardHeader>
                   <CardTitle>Table Selection</CardTitle>
                   <CardDescription>
-                    Select the table to use as data source
+                    Select one or more tables to use as data source
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <TableSelection
                     tables={availableTables}
-                    selectedTable={selectedTable}
+                    selectedTables={selectedTables}
                     onSelect={handleTableSelect}
                   />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Join Condition Card */}
+            {showJoinInput && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Join Configuration</CardTitle>
+                  <CardDescription>
+                    Specify how to join the selected tables
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="joinCondition"
+                        className="text-sm font-medium"
+                      >
+                        Join Condition
+                      </label>
+                      <textarea
+                        id="joinCondition"
+                        value={joinCondition}
+                        onChange={(e) => setJoinCondition(e.target.value)}
+                        placeholder="Example: table1.id = table2.id AND table2.category = table3.category"
+                        className="w-full min-h-[100px] p-2 border rounded-md"
+                      />
+                      <p className="text-sm text-gray-500">
+                        Use SQL join syntax to specify how tables should be
+                        joined.
+                      </p>
+                      <button
+                        onClick={handleTestJoin}
+                        className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                        disabled={!joinCondition || status === "fetching"}
+                      >
+                        Test Join
+                      </button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -337,7 +459,10 @@ const Index = () => {
                       className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
                       onClick={handleStartIngestion}
                       disabled={
-                        status === "ingesting" || !sourceType || !targetType
+                        status === "ingesting" ||
+                        !sourceType ||
+                        !targetType ||
+                        (showJoinInput && !joinCondition) // Disable if join condition is required but not provided
                       }
                     >
                       {status === "ingesting"
